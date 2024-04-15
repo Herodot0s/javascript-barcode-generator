@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode Sticker Generator</title>
+    <script src="https://unpkg.com/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+</head>
+<body>
+    <style>
+            body, h1, p, label, input, select, button {
+                margin: 0;
+                padding: 0;
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
+
+            #barcodeForm {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1rem;
+            }
+
+            #barcodeForm label {
+                color: #333;
+                margin-bottom: 0.5rem;
+            }
+
+            #barcodeForm input, #barcodeForm select {
+                padding: 0.5rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            #barcodeForm button {
+                background-color: #FFC107; /* McDonald's Yellow */
+                color: #333;
+                padding: 1rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: bold;
+                margin-top: 1rem;
+            }
+
+            #barcodeForm button:hover {
+                background-color: #FFD54F;
+            }
+
+            .sticker {
+                border: 2px dashed #FFC107; 
+                padding: 1rem;
+                margin: 1rem;
+                width: 200px;
+            }
+
+            .sticker-info {
+                background-color: #FFF;
+                color: #333;
+                padding: 0.5rem;
+                text-align: center;
+            }
+
+            #stickersContainer {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin: 2rem;
+            }
+
+            @media (max-width: 768px) {
+                #stickersContainer {
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                .sticker {
+                    width: 100%;
+                    max-width: 300px;
+                }
+            }
+    </style>
+<h1>Barcode Sticker Generator</h1>
+
+<form id="barcodeForm">
+    <label for="productName">Name:</label>
+    <input type="text" id="productName" name="productName" required><br>
+
+    <label for="productCode">Code:</label>
+    <input type="text" id="productCode" name="productCode" required><br>
+
+    <label for="productPrice">Price:</label>
+    <input type="number" id="productPrice" name="productPrice" required><br>
+
+    <label for="manufacturer">Manufacturer:</label>
+    <input type="text" id="manufacturer" name="manufacturer" required><br>
+
+    <label for="manufacturingDate">Manufacturing Date:</label>
+    <input type="date" id="manufacturingDate" name="manufacturingDate" required><br>
+
+    <label for="numberOfStickers">Number of Stickers:</label>
+    <input type="number" id="numberOfStickers" name="numberOfStickers" required><br>
+
+    <label for="stickerColor">Sticker Color:</label>
+    <input type="color" id="stickerColor" name="stickerColor" value="#000000"><br>
+
+    <label for="stickerSize">Sticker Size (in pixels):</label>
+    <input type="number" id="stickerSize" name="stickerSize" value="100"><br>
+
+    <label for="pageOrientation">Page Orientation:</label>
+    <select id="pageOrientation" name="pageOrientation">
+        <option value="portrait">Portrait</option>
+        <option value="landscape">Landscape</option>
+    </select><br>
+
+    <button type="button" onclick="generateStickers()">Create Stickers</button>
+    <button type="button" onclick="printStickers()">Print</button>
+</form>
+
+<div id="stickersContainer"></div>
+
+<script>
+    function generateStickers() {
+        const form = document.getElementById('barcodeForm');
+        const stickersContainer = document.getElementById('stickersContainer');
+        
+        const numberOfStickers = parseInt(form.elements.numberOfStickers.value);
+        const stickerColor = form.elements.stickerColor.value;
+        const stickerSize = parseInt(form.elements.stickerSize.value);
+        const pageOrientation = form.elements.pageOrientation.value;
+
+        stickersContainer.innerHTML = '';
+
+        for (let i = 0; i < numberOfStickers; i++) {
+            const stickerDiv = document.createElement('div');
+            stickerDiv.className = 'sticker';
+
+            const barcodeCanvas = document.createElement('canvas');
+            JsBarcode(barcodeCanvas, form.elements.productCode.value, {
+                format: 'CODE128',
+                displayValue: false,
+                width: 2,
+                height: 50,
+                margin: 0
+            });
+
+            barcodeCanvas.style.backgroundColor = stickerColor;
+            barcodeCanvas.style.width = stickerSize + 'px';
+            barcodeCanvas.style.height = '50px'; 
+            barcodeCanvas.style.margin = '5px auto 0';
+
+            stickerDiv.appendChild(barcodeCanvas);
+
+            const stickerInfo = document.createElement('div');
+            stickerInfo.className = 'sticker-info';
+            stickerInfo.innerHTML = `
+                <p><strong>${form.elements.productName.value}</strong></p>
+                <p>Code: ${form.elements.productCode.value}</p>
+                <p>Price: ${form.elements.productPrice.value}</p>
+                <p>Manufacturer: ${form.elements.manufacturer.value}</p>
+                <p>Manufacturing Date: ${form.elements.manufacturingDate.value}</p>
+            `;
+
+            stickerDiv.appendChild(stickerInfo);
+            stickersContainer.appendChild(stickerDiv);
+        }
+
+        if (pageOrientation === 'landscape') {
+            stickersContainer.style.width = '100%';
+            stickersContainer.style.whiteSpace = 'nowrap';
+        } else {
+            stickersContainer.style.whiteSpace = 'normal';
+        }
+    }
+
+    function printStickers() {
+        window.print();
+    }
+</script>
+
+</body>
+</html>
